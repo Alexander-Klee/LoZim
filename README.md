@@ -6,3 +6,12 @@ Easily search through downloaded Wikis like Wikipedia or the ArchLinux-Wiki.
 ## Dependencies
 
 - [ECM](https://github.com/KDE/extra-cmake-modules/tree/master) (kf6)
+- libzim
+
+## TODO
+
+- Add Action to visit locally saved website
+- Add Action to visit online website
+- Preview first sentence of article in KRunner
+- is fuzzy find for zim possible?
+- Add icon

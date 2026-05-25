@@ -1,5 +1,10 @@
 #include "lozim.h"
 #include <QIcon>
+#include <zim/archive.h>
+#include <zim/item.h>
+#include <zim/suggestion.h>
+#include <iostream>
+
 
 Lozim::Lozim(QObject *parent, const KPluginMetaData &data)
 : AbstractRunner(parent, data)
@@ -9,7 +14,18 @@ Lozim::Lozim(QObject *parent, const KPluginMetaData &data)
 void Lozim::init()
 {
     reloadConfiguration();
-    connect(this, &AbstractRunner::prepare, this, []() {
+
+    // load the archive
+    try {
+        archive_.emplace("/home/alex/Dokumente/wiki/wikipedia_en_all_mini_2026-03.zim");
+        if (archive_) searcher_.emplace(archive_.value());
+    } catch (const std::exception &e) {
+        archive_.reset();
+        qWarning() << "Failed to open ZIM archive:" << e.what();
+        return;
+    }
+
+    connect(this, &AbstractRunner::prepare, this, [this]() {
         // Initialize data for the match session. This gets called from the main thread
     });
     connect(this, &AbstractRunner::teardown, this, []() {
@@ -24,23 +40,34 @@ void Lozim::match(KRunner::RunnerContext &context) {
 
     const QString triggerWord = QStringLiteral("lz");
     if (!query.startsWith(triggerWord)) return;
+    query.remove(0, triggerWord.length());
+
+    if (!this->archive_ || !this->searcher_) return;
+    auto searcher = this->searcher_.value();
 
     QList<KRunner::QueryMatch> matches;
     // qWarning() << query << m_path;
 
-    KRunner::QueryMatch match(this);
-    match.setText(QStringLiteral("Lozim!!!!"));
-    match.setRelevance(1.0);
-    match.setData(QStringLiteral("This is Data."));
-    // match.setId(path);
-    // QIcon icon = QIcon::fromTheme(mimeDb.mimeTypeForFile(path).iconName());
-    const QIcon icon = QIcon::fromTheme(QStringLiteral("applications-education-language"));
-    match.setIcon(icon);
-    match.setCategoryRelevance(KRunner::QueryMatch::CategoryRelevance::Highest); // TODO
-    match.setSubtext(QStringLiteral("Subtext visible on highlight"));
-    // match.setMultiLine(true);
+    auto search = searcher.suggest(query.toStdString());
+    auto results = search.getResults(0, 5);
 
-    matches.append(match);
+    auto relevance = 1.0;
+    for (auto it = results.begin(); it != results.end(); ++it) {
+
+        KRunner::QueryMatch match(this);
+        match.setText(QString::fromStdString(it->getSnippet()));
+        // match.setSubtext(QString::fromStdString(it->));
+
+        const QIcon icon = QIcon::fromTheme(QStringLiteral("applications-education-language"));
+        match.setIcon(icon);
+        match.setCategoryRelevance(KRunner::QueryMatch::CategoryRelevance::Highest); // TODO
+        // match.setData();
+        match.setMultiLine(true);
+        match.setRelevance(relevance);
+        relevance -= 0.01;
+
+        matches.append(match);
+    }
     context.addMatches(matches);
 }
 

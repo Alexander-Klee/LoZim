@@ -1,6 +1,8 @@
 #pragma once
 
 #include <KRunner/AbstractRunner>
+#include <zim/archive.h>
+#include <zim/suggestion.h>
 
 class Lozim : public KRunner::AbstractRunner
 {
@@ -17,6 +19,6 @@ protected:
     void init() override;
 
 private:
-    QString m_path;
-    QString m_triggerWord;
+    std::optional<zim::Archive> archive_;
+    std::optional<zim::SuggestionSearcher> searcher_;
 };

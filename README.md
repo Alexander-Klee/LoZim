@@ -1,6 +1,7 @@
-# Example KRunner module
+# LoZim
 
-Barebones example of a [module for KRunner](https://develop.kde.org/docs/plasma/krunner/) 6.
+Local Zim file search for KRunner 6.
+Easily search through downloaded Wikis like Wikipedia or the ArchLinux-Wiki.
 
 ## Dependencies
 

@@ -1,12 +1,12 @@
-#include "runnerexample.h"
+#include "lozim.h"
 #include <QIcon>
 
-ExampleRunner::ExampleRunner(QObject *parent, const KPluginMetaData &data)
+Lozim::Lozim(QObject *parent, const KPluginMetaData &data)
 : AbstractRunner(parent, data)
 {
 }
 
-void ExampleRunner::init()
+void Lozim::init()
 {
     reloadConfiguration();
     connect(this, &AbstractRunner::prepare, this, []() {
@@ -17,19 +17,19 @@ void ExampleRunner::init()
     });
 }
 
-void ExampleRunner::match(KRunner::RunnerContext &context) {
+void Lozim::match(KRunner::RunnerContext &context) {
     if (!context.isValid()) return;
     QString query = context.query();
     if (query.startsWith(QLatin1Char('?'))) return;
 
-    const QString triggerWord = QStringLiteral("ex");
+    const QString triggerWord = QStringLiteral("lz");
     if (!query.startsWith(triggerWord)) return;
 
     QList<KRunner::QueryMatch> matches;
     // qWarning() << query << m_path;
 
     KRunner::QueryMatch match(this);
-    match.setText(QStringLiteral("This is an example match."));
+    match.setText(QStringLiteral("Lozim!!!!"));
     match.setRelevance(1.0);
     match.setData(QStringLiteral("This is Data."));
     // match.setId(path);
@@ -44,13 +44,13 @@ void ExampleRunner::match(KRunner::RunnerContext &context) {
     context.addMatches(matches);
 }
 
-void ExampleRunner::run(const KRunner::RunnerContext & /*context*/, const KRunner::QueryMatch &match)
+void Lozim::run(const KRunner::RunnerContext & /*context*/, const KRunner::QueryMatch &match)
 {
 }
 
-void ExampleRunner::reloadConfiguration()
+void Lozim::reloadConfiguration()
 {
 }
 
-K_PLUGIN_CLASS_WITH_JSON(ExampleRunner, "runnerexample.json")
-#include "runnerexample.moc"
+K_PLUGIN_CLASS_WITH_JSON(Lozim, "lozim.json")
+#include "lozim.moc"

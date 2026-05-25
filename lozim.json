@@ -6,11 +6,11 @@
         "Name": "Example Name"
       }
     ],
-    "Description": "Example Plugin",
+    "Description": "Local Zim file search for KRunner.",
     "EnabledByDefault": true,
     "Icon": "user-home",
     "License": "GPL",
-    "Name": "Runner Example",
+    "Name": "LoZim",
     "Version": "0.1",
     "Website": "https://example.com/"
   }

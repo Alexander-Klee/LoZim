@@ -1,0 +1,17 @@
+{
+  "KPlugin": {
+    "Authors": [
+      {
+        "Email": "example@example.com",
+        "Name": "Example Name"
+      }
+    ],
+    "Description": "Example Plugin",
+    "EnabledByDefault": true,
+    "Icon": "user-home",
+    "License": "GPL",
+    "Name": "Runner Example",
+    "Version": "0.1",
+    "Website": "https://example.com/"
+  }
+}

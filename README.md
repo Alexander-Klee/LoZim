@@ -10,8 +10,9 @@ Easily search through downloaded Wikis like Wikipedia or the ArchLinux-Wiki.
 
 ## TODO
 
-- Add Action to visit locally saved website
-- Add Action to visit online website
-- Preview first sentence of article in KRunner
-- is fuzzy find for zim possible?
-- Add icon
+- [x] Add icon
+- [] Add Action to visit locally saved website
+- [] Add Action to visit online website
+- [] Support multiple archives
+- [] Preview first sentence of article in KRunner
+- [] is fuzzy find for zim possible?

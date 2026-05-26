@@ -1,6 +1,8 @@
 #pragma once
 
 #include <KRunner/AbstractRunner>
+#include <KRunner/Action>
+#include <QIcon>
 #include <zim/archive.h>
 #include <zim/suggestion.h>
 
@@ -21,4 +23,5 @@ protected:
 private:
     std::optional<zim::Archive> archive_;
     std::optional<zim::SuggestionSearcher> searcher_;
+    std::optional<QIcon> icon_;
 };

@@ -1,9 +1,14 @@
 #include "lozim.h"
+
+#include <iostream>
+#include <KNotificationJobUiDelegate>
 #include <QIcon>
+#include <QImage>
+#include <QPixmap>
+#include <KIO/OpenUrlJob>
 #include <zim/archive.h>
 #include <zim/item.h>
 #include <zim/suggestion.h>
-#include <iostream>
 
 
 Lozim::Lozim(QObject *parent, const KPluginMetaData &data)
@@ -13,12 +18,22 @@ Lozim::Lozim(QObject *parent, const KPluginMetaData &data)
 
 void Lozim::init()
 {
+    // Setup that should be done once comes here
     reloadConfiguration();
 
     // load the archive
     try {
         archive_.emplace("/home/alex/Dokumente/wiki/wikipedia_en_all_mini_2026-03.zim");
-        if (archive_) searcher_.emplace(archive_.value());
+        if (!archive_) return; // TODO is it a good idea to return here?
+        // get base addr
+
+        // get icon
+        const auto iconBlob = archive_.value().getIllustrationItem().getData();
+        const auto bytes = QByteArray::fromRawData(iconBlob.data(), iconBlob.size());
+        const auto img = QImage::fromData(bytes);
+        if (img.isNull()) return;
+        icon_ = QIcon(QPixmap::fromImage(img));
+        searcher_.emplace(archive_.value());
     } catch (const std::exception &e) {
         archive_.reset();
         qWarning() << "Failed to open ZIM archive:" << e.what();
@@ -44,6 +59,8 @@ void Lozim::match(KRunner::RunnerContext &context) {
 
     if (!this->archive_ || !this->searcher_) return;
     auto searcher = this->searcher_.value();
+    auto fallbackIcon = QIcon::fromTheme(QStringLiteral("applications-education-language"));
+    auto icon = (this->icon_)? this->icon_.value() : fallbackIcon;
 
     QList<KRunner::QueryMatch> matches;
     // qWarning() << query << m_path;
@@ -57,8 +74,12 @@ void Lozim::match(KRunner::RunnerContext &context) {
         KRunner::QueryMatch match(this);
         match.setText(QString::fromStdString(it->getSnippet()));
         // match.setSubtext(QString::fromStdString(it->));
+        // match.setSubtext(QString::fromStdString(item.getData()));
+        match.setData(QString::fromStdString(it->getPath()));
 
-        const QIcon icon = QIcon::fromTheme(QStringLiteral("applications-education-language"));
+        match.setCategoryRelevance(KRunner::QueryMatch::CategoryRelevance::Highest); // TODO
+        match.setMultiLine(true);
+        // match.setActions(actions);
         match.setIcon(icon);
         match.setCategoryRelevance(KRunner::QueryMatch::CategoryRelevance::Highest); // TODO
         // match.setData();

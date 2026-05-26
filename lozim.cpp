@@ -26,6 +26,9 @@ void Lozim::init()
         archive_.emplace("/home/alex/Dokumente/wiki/wikipedia_en_all_mini_2026-03.zim");
         if (!archive_) return; // TODO is it a good idea to return here?
         // get base addr
+        auto source = archive_->getMetadata("Source");
+        baseAddr_ = QString::fromStdString(source);
+        // if (baseAddr_ == QStringLiteral("en.wikipedia.org")) baseAddr_ = QStringLiteral("en.wikipedia.org/wiki");
 
         // get icon
         const auto iconBlob = archive_.value().getIllustrationItem().getData();
@@ -73,17 +76,13 @@ void Lozim::match(KRunner::RunnerContext &context) {
 
         KRunner::QueryMatch match(this);
         match.setText(QString::fromStdString(it->getSnippet()));
-        // match.setSubtext(QString::fromStdString(it->));
-        // match.setSubtext(QString::fromStdString(item.getData()));
+        match.setSubtext(baseAddr_.value());
         match.setData(QString::fromStdString(it->getPath()));
 
         match.setCategoryRelevance(KRunner::QueryMatch::CategoryRelevance::Highest); // TODO
         match.setMultiLine(true);
         // match.setActions(actions);
         match.setIcon(icon);
-        match.setCategoryRelevance(KRunner::QueryMatch::CategoryRelevance::Highest); // TODO
-        // match.setData();
-        match.setMultiLine(true);
         match.setRelevance(relevance);
         relevance -= 0.01;
 
@@ -92,8 +91,31 @@ void Lozim::match(KRunner::RunnerContext &context) {
     context.addMatches(matches);
 }
 
-void Lozim::run(const KRunner::RunnerContext & /*context*/, const KRunner::QueryMatch &match)
+void Lozim::run(const KRunner::RunnerContext &context, const KRunner::QueryMatch &match)
 {
+    Q_UNUSED(context);
+    {
+        // open wiki url
+        const QString wikiLink =
+            QStringLiteral("https://") +
+            baseAddr_.value() +
+            QStringLiteral("/") + // FIXME missing /wiki/ or /title/
+            QString::fromLatin1(QUrl::toPercentEncoding(match.data().toString()));
+
+        auto url = QUrl(wikiLink);
+        auto *job = new KIO::OpenUrlJob(url);
+        job->setUiDelegate(new KNotificationJobUiDelegate(KJobUiDelegate::AutoErrorHandlingEnabled));
+        job->setRunExecutables(false);
+        job->start();
+    }
+
+    // if (match.selectedAction() && match.selectedAction().id() == QLatin1String("visit_local")) {
+    //     // TODO
+    // } else if (match.selectedAction() && match.selectedAction().id() == QLatin1String("visit_online")) {
+    //     // TODO
+    //     // KIO::OpenUrlJob autodeletes itself, so we can just create it and forget it!
+    //     // QString title = QStringLiteral("Alan Turing");
+    // }
 }
 
 void Lozim::reloadConfiguration()

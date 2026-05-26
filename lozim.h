@@ -24,4 +24,5 @@ private:
     std::optional<zim::Archive> archive_;
     std::optional<zim::SuggestionSearcher> searcher_;
     std::optional<QIcon> icon_;
+    std::optional<QString> baseAddr_;
 };

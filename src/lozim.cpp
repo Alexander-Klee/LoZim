@@ -8,7 +8,8 @@
 #include <KIO/OpenUrlJob>
 #include <zim/archive.h>
 #include <zim/item.h>
-#include <zim/suggestion.h>
+
+#include "ZimArchive.h"
 
 
 Lozim::Lozim(QObject *parent, const KPluginMetaData &data)
@@ -21,27 +22,8 @@ void Lozim::init()
     // Setup that should be done once comes here
     reloadConfiguration();
 
-    // load the archive
-    try {
-        archive_.emplace("/home/alex/Dokumente/wiki/wikipedia_en_all_mini_2026-03.zim");
-        if (!archive_) return; // TODO is it a good idea to return here?
-        // get base addr
-        auto source = archive_->getMetadata("Source");
-        baseAddr_ = QString::fromStdString(source);
-        // if (baseAddr_ == QStringLiteral("en.wikipedia.org")) baseAddr_ = QStringLiteral("en.wikipedia.org/wiki");
-
-        // get icon
-        const auto iconBlob = archive_.value().getIllustrationItem().getData();
-        const auto bytes = QByteArray::fromRawData(iconBlob.data(), iconBlob.size());
-        const auto img = QImage::fromData(bytes);
-        if (img.isNull()) return;
-        icon_ = QIcon(QPixmap::fromImage(img));
-        searcher_.emplace(archive_.value());
-    } catch (const std::exception &e) {
-        archive_.reset();
-        qWarning() << "Failed to open ZIM archive:" << e.what();
-        return;
-    }
+    auto archive = ZimArchive("/home/alex/Dokumente/wiki/wikipedia_en_all_mini_2026-03.zim");
+    archives.append(archive);
 
     connect(this, &AbstractRunner::prepare, this, [this]() {
         // Initialize data for the match session. This gets called from the main thread
@@ -60,28 +42,26 @@ void Lozim::match(KRunner::RunnerContext &context) {
     if (!query.startsWith(triggerWord)) return;
     query.remove(0, triggerWord.length());
 
-    if (!this->archive_ || !this->searcher_) return;
-    auto searcher = this->searcher_.value();
-    auto fallbackIcon = QIcon::fromTheme(QStringLiteral("applications-education-language"));
-    auto icon = (this->icon_)? this->icon_.value() : fallbackIcon;
+    auto archive = archives[0];
+
+    if (!archive.isValid()) return;
 
     QList<KRunner::QueryMatch> matches;
 
-    auto search = searcher.suggest(query.toStdString());
-    auto results = search.getResults(0, 5);
+    auto results = archive.suggest(query);
 
     auto relevance = 1.0;
     for (auto it = results.begin(); it != results.end(); ++it) {
 
         KRunner::QueryMatch match(this);
         match.setText(QString::fromStdString(it->getSnippet()));
-        match.setSubtext(baseAddr_.value());
+        match.setSubtext(archive.source());
         match.setData(QString::fromStdString(it->getPath()));
 
         match.setCategoryRelevance(KRunner::QueryMatch::CategoryRelevance::Highest); // TODO
         match.setMultiLine(true);
         // match.setActions(actions);
-        match.setIcon(icon);
+        match.setIcon(archive.icon());
         match.setRelevance(relevance);
         relevance -= 0.01;
 
@@ -94,11 +74,9 @@ void Lozim::run(const KRunner::RunnerContext &context, const KRunner::QueryMatch
 {
     Q_UNUSED(context);
     {
+        auto archive = archives[0];
         // open wiki url
-        const QString wikiLink =
-            QStringLiteral("https://") +
-            baseAddr_.value() +
-            QStringLiteral("/") + // FIXME missing /wiki/ or /title/
+        const QString wikiLink = archive.baseAddress() +
             QString::fromLatin1(QUrl::toPercentEncoding(match.data().toString()));
 
         auto url = QUrl(wikiLink);

@@ -14,7 +14,7 @@ include(FeatureSummary)
 
 find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS I18n Config Runner KIO Notifications)
 
-kcoreaddons_add_plugin(lozim SOURCES src/lozim.cpp INSTALL_NAMESPACE "kf6/krunner")
+kcoreaddons_add_plugin(lozim SOURCES src/lozim.cpp src/ZimArchive.cpp INSTALL_NAMESPACE "kf6/krunner")
 
 target_compile_options(lozim PRIVATE -fexceptions) # TODO
 

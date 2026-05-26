@@ -2,9 +2,7 @@
 
 #include <KRunner/AbstractRunner>
 #include <KRunner/Action>
-#include <QIcon>
-#include <zim/archive.h>
-#include <zim/suggestion.h>
+#include "ZimArchive.h"
 
 
 class Lozim : public KRunner::AbstractRunner
@@ -22,8 +20,6 @@ protected:
     void init() override;
 
 private:
-    std::optional<zim::Archive> archive_;
-    std::optional<zim::SuggestionSearcher> searcher_;
-    std::optional<QIcon> icon_;
-    std::optional<QString> baseAddr_;
+    QList<KRunner::Action> actions;
+    QList<ZimArchive> archives;
 };

@@ -66,7 +66,6 @@ void Lozim::match(KRunner::RunnerContext &context) {
     auto icon = (this->icon_)? this->icon_.value() : fallbackIcon;
 
     QList<KRunner::QueryMatch> matches;
-    // qWarning() << query << m_path;
 
     auto search = searcher.suggest(query.toStdString());
     auto results = search.getResults(0, 5);

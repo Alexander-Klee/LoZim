@@ -6,6 +6,7 @@
 #include <zim/archive.h>
 #include <zim/suggestion.h>
 
+
 class Lozim : public KRunner::AbstractRunner
 {
     Q_OBJECT

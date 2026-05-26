@@ -12,9 +12,9 @@ Easily search through downloaded Wikis like Wikipedia or the ArchLinux-Wiki.
 
 - [x] Add icon
 - [x] Add Action to visit online website
+- [] make trigger word customizable
 - [] fix base address for online website link (needs sth like /wiki/ or /title/) 
 - [] Add Action to visit locally saved website
-- [] make trigger word customizable
 - [] Support multiple archives
 - [] Preview first sentence of article in KRunner
 - [] is fuzzy find for zim possible?

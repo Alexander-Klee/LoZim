@@ -6,10 +6,14 @@
 
 #include <KCModule>
 #include <KUrlRequester>
+#include <QBoxLayout>
+#include <QCheckBox>
+#include <QGroupBox>
 #include <QLineEdit>
 
 static constexpr char CONFIG_TRIGGERWORD[] = "triggerWord";
 static constexpr char CONFIG_ZIM_FILEPATH[] = "zimDirpath";
+static constexpr char CONFIG_ARCHIVES_GROUP[] = "Archives";
 
 class LozimConfig : public KCModule {
     Q_OBJECT
@@ -17,6 +21,8 @@ class LozimConfig : public KCModule {
 public:
     explicit LozimConfig(QObject *parent,
                          const KPluginMetaData &metaData);
+
+    void rebuildArchiveList();
 
 public Q_SLOTS:
     void save() override;
@@ -26,4 +32,8 @@ public Q_SLOTS:
 private:
     QLineEdit *triggerWord;
     KUrlRequester *zimDirpath;
+    QMap<QString, QCheckBox*> archiveChecks; // key: filename
+
+    QGroupBox *archivesBox;
+    QVBoxLayout *archivesLayout;
 };

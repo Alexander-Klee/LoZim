@@ -41,15 +41,22 @@ void Lozim::init()
 void Lozim::load_archives() {
     archives.clear();
 
-    QDir dir(zimDirpath);
-    for (const QString &file : dir.entryList(QStringList() << QStringLiteral("*.zim"),
-            QDir::Files | QDir::NoDot | QDir::NoDotDot)) {
+    const KConfigGroup c = config();
+    const KConfigGroup archivesGrp = c.group(QString::fromStdString(CONFIG_ARCHIVES_GROUP));
+
+    const QDir dir(zimDirpath);
+    const auto files = dir.entryList({QStringLiteral("*.zim")}, QDir::Files | QDir::NoDotAndDotDot);
+    for (const QString &file : files) {
+
+        const bool enabled = archivesGrp.readEntry(file, true);
+        if (!enabled) continue;
 
         const QString path = dir.absoluteFilePath(file);
 
         auto archive = ZimArchive(path.toStdString());
-        if (archive.isValid()) archives.append(archive);
-        else {
+        if (archive.isValid()) {
+            archives.append(std::move(archive));
+        } else {
             qWarning() << Q_FUNC_INFO << "Unable to use zim archive: " << path;
         }
     }

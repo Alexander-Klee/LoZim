@@ -25,7 +25,7 @@ just run `./install.sh`, it will build and copy the `.so` to `/lib/qt6/plugins/k
 - [x] publish Recognized Syntax
 - [x] Support multiple archives
 - [x] Support configuration for archive folder (including symlinks?)
-- [ ] fix base address for online website link (needs sth like /wiki/ or /title/) 
+- [x] fix base address for online website link (needs sth like /wiki/ or /title/) 
 - [ ] Add Action to visit locally saved website
 - [ ] Preview first sentence of article in KRunner
 - [ ] is fuzzy find for zim possible?

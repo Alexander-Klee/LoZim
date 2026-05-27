@@ -23,7 +23,7 @@ protected:
 
 private:
     QString triggerWord;
-    QString zimFilepath;
+    QString zimDirpath;
     QList<KRunner::Action> actions;
     QList<ZimArchive> archives;
 };

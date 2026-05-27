@@ -41,7 +41,7 @@ void Lozim::init()
 void Lozim::load_archives() {
     archives.clear();
 
-    QDir dir(zimFilepath);
+    QDir dir(zimDirpath);
     for (const QString &file : dir.entryList(QStringList() << QStringLiteral("*.zim"),
             QDir::Files | QDir::NoDot | QDir::NoDotDot)) {
 
@@ -136,9 +136,9 @@ void Lozim::reloadConfiguration()
 
     // config for the zim filepath
     QString defaultDirpath = QDir::homePath() + QStringLiteral("/Documents/wiki/");
-    zimFilepath = c.readPathEntry(CONFIG_ZIM_FILEPATH, defaultDirpath);
-    QFileInfo pathInfo(zimFilepath);
-    if (!pathInfo.isDir()) zimFilepath = defaultDirpath;
+    zimDirpath = c.readPathEntry(CONFIG_ZIM_FILEPATH, defaultDirpath);
+    QFileInfo pathInfo(zimDirpath);
+    if (!pathInfo.isDir()) zimDirpath = defaultDirpath;
     load_archives();
 
     // advertise help in KRunner '?lozim'

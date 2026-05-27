@@ -9,7 +9,7 @@
 #include <QLineEdit>
 
 static constexpr char CONFIG_TRIGGERWORD[] = "triggerWord";
-static constexpr char CONFIG_ZIM_FILEPATH[] = "zimFilepath";
+static constexpr char CONFIG_ZIM_FILEPATH[] = "zimDirpath";
 
 class LozimConfig : public KCModule {
     Q_OBJECT

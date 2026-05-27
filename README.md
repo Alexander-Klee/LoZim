@@ -13,8 +13,8 @@ Easily search through downloaded Wikis like Wikipedia or the ArchLinux-Wiki.
 - [x] Add icon
 - [x] Add Action to visit online website
 - [x] make trigger word customizable
+- [x] publish Recognized Syntax
 - [ ] better install (just local without sudo?)
-- [ ] publish Recognized Syntax
 - [ ] fix base address for online website link (needs sth like /wiki/ or /title/) 
 - [ ] Add Action to visit locally saved website
 - [ ] Support multiple archives

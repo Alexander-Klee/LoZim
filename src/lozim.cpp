@@ -1,20 +1,28 @@
 #include "lozim.h"
 
 #include <iostream>
+#include <KConfigGroup>
+#include <klocalizedstring.h>
 #include <KNotificationJobUiDelegate>
-#include <QIcon>
 #include <QImage>
-#include <QPixmap>
 #include <KIO/OpenUrlJob>
 #include <zim/archive.h>
 #include <zim/item.h>
 
+#include "lozim_config.h"
 #include "ZimArchive.h"
 
 
 Lozim::Lozim(QObject *parent, const KPluginMetaData &data)
 : AbstractRunner(parent, data)
 {
+    // KRunner::Action visit_local(QStringLiteral("visit_local"),
+    //                      QStringLiteral("edit-copy"),
+    //                      QStringLiteral("Visit Local Site"));
+    // KRunner::Action visit_online(QStringLiteral("visit_online"),
+    //                      QStringLiteral("media-playback-start"),
+    //                      QStringLiteral("Visit Online Site"));
+    // actions = {visit_local, visit_online};
 }
 
 void Lozim::init()
@@ -25,12 +33,14 @@ void Lozim::init()
     auto archive = ZimArchive("/home/alex/Dokumente/wiki/wikipedia_en_all_mini_2026-03.zim");
     archives.append(archive);
 
-    connect(this, &AbstractRunner::prepare, this, [this]() {
-        // Initialize data for the match session. This gets called from the main thread
-    });
-    connect(this, &AbstractRunner::teardown, this, []() {
-        // Cleanup data from the match session. This gets called from the main thread
-    });
+    qWarning() << triggerWord;
+
+    // connect(this, &AbstractRunner::prepare, this, [this]() {
+    //     // Initialize data for the match session. This gets called from the main thread
+    // });
+    // connect(this, &AbstractRunner::teardown, this, []() {
+    //     // Cleanup data from the match session. This gets called from the main thread
+    // });
 }
 
 void Lozim::match(KRunner::RunnerContext &context) {
@@ -53,6 +63,8 @@ void Lozim::match(KRunner::RunnerContext &context) {
 
     auto relevance = 1.0;
     for (auto it = results.begin(); it != results.end(); ++it) {
+        // auto entry = it.getEntry();
+        // auto item = entry.getItem(true);
 
         KRunner::QueryMatch match(this);
         match.setText(QString::fromStdString(it->getSnippet()));
@@ -75,12 +87,13 @@ void Lozim::run(const KRunner::RunnerContext &context, const KRunner::QueryMatch
 {
     Q_UNUSED(context);
     {
-        auto archive = archives[0];
         // open wiki url
+        auto archive = archives[0];
         const QString wikiLink = archive.baseAddress() +
             QString::fromLatin1(QUrl::toPercentEncoding(match.data().toString()));
 
         auto url = QUrl(wikiLink);
+        // KIO::OpenUrlJob autodeletes itself, so we can just create it and forget it!
         auto *job = new KIO::OpenUrlJob(url);
         job->setUiDelegate(new KNotificationJobUiDelegate(KJobUiDelegate::AutoErrorHandlingEnabled));
         job->setRunExecutables(false);
@@ -91,8 +104,6 @@ void Lozim::run(const KRunner::RunnerContext &context, const KRunner::QueryMatch
     //     // TODO
     // } else if (match.selectedAction() && match.selectedAction().id() == QLatin1String("visit_online")) {
     //     // TODO
-    //     // KIO::OpenUrlJob autodeletes itself, so we can just create it and forget it!
-    //     // QString title = QStringLiteral("Alan Turing");
     // }
 }
 
@@ -106,8 +117,12 @@ void Lozim::reloadConfiguration()
     } else {
         setMatchRegex(QRegularExpression());
     }
-    // TODO
-    // setSyntaxes({RunnerSyntax(i18nc("Dictionary keyword", "%1:q:", triggerWord), i18n("Finds the definition of :q:."))});
+
+    // TODO also show help when asking about the trigger word: "?lz"
+    QList<KRunner::RunnerSyntax> syntaxes;
+    KRunner::RunnerSyntax syntax(QStringLiteral("%1:q:").arg(triggerWord), i18n("Finds matching zim file entries for :q:"));
+    syntaxes.append(syntax);
+    setSyntaxes(syntaxes);
 }
 
 K_PLUGIN_CLASS_WITH_JSON(Lozim, "lozim.json")

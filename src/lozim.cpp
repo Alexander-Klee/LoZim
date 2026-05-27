@@ -30,10 +30,8 @@ void Lozim::init()
     // Setup that should be done once comes here
     reloadConfiguration();
 
-    auto archive = ZimArchive("/home/alex/Dokumente/wiki/wikipedia_en_all_mini_2026-03.zim");
-    archives.append(archive);
-
-    qWarning() << triggerWord;
+    archives.append(ZimArchive("/home/alex/Dokumente/wiki/wikipedia_en_all_mini_2026-03.zim"));
+    archives.append(ZimArchive("/home/alex/Dokumente/wiki/archlinux_en_all_maxi_2026-04.zim"));
 
     // connect(this, &AbstractRunner::prepare, this, [this]() {
     //     // Initialize data for the match session. This gets called from the main thread
@@ -53,32 +51,35 @@ void Lozim::match(KRunner::RunnerContext &context) {
         query.remove(0, triggerWord.length());
     }
 
-    auto archive = archives[0];
-
-    if (!archive.isValid()) return;
-
     QList<KRunner::QueryMatch> matches;
 
-    auto results = archive.suggest(query);
+    for (auto archive = archives.begin(); archive != archives.end(); ++archive) {
+        if (!archive->isValid()) continue;
+        auto results = archive->suggest(query);
 
-    auto relevance = 1.0;
-    for (auto it = results.begin(); it != results.end(); ++it) {
-        // auto entry = it.getEntry();
-        // auto item = entry.getItem(true);
+        auto relevance = 1.0;
+        for (auto it = results.begin(); it != results.end(); ++it) {
+            // auto entry = it.getEntry();
+            // auto item = entry.getItem(true);
 
-        KRunner::QueryMatch match(this);
-        match.setText(QString::fromStdString(it->getSnippet()));
-        match.setSubtext(archive.source());
-        match.setData(QString::fromStdString(it->getPath()));
+            KRunner::QueryMatch match(this);
+            match.setText(QString::fromStdString(it->getSnippet()));
+            match.setSubtext(archive->source());
 
-        match.setCategoryRelevance(KRunner::QueryMatch::CategoryRelevance::Highest); // TODO
-        match.setMultiLine(true);
-        // match.setActions(actions);
-        match.setIcon(archive.icon());
-        match.setRelevance(relevance);
-        relevance -= 0.01;
+            // add link to online page for later retrieval
+            const QString wikiLink = archive->baseAddress() +
+                QString::fromLatin1(QUrl::toPercentEncoding(QString::fromStdString(it->getPath())));
+            match.setData(wikiLink);
+            // match.setActions(actions);
 
-        matches.append(match);
+            match.setCategoryRelevance(KRunner::QueryMatch::CategoryRelevance::Highest); // TODO
+            match.setRelevance(relevance);
+            match.setMultiLine(true);
+            match.setIcon(archive->icon());
+            relevance -= 0.01;
+
+            matches.append(match);
+        }
     }
     context.addMatches(matches);
 }
@@ -87,11 +88,10 @@ void Lozim::run(const KRunner::RunnerContext &context, const KRunner::QueryMatch
 {
     Q_UNUSED(context);
     {
-        // open wiki url
-        auto archive = archives[0];
-        const QString wikiLink = archive.baseAddress() +
-            QString::fromLatin1(QUrl::toPercentEncoding(match.data().toString()));
+        // get wiki url
+        const QString wikiLink = match.data().toString();
 
+        // open url in br
         auto url = QUrl(wikiLink);
         // KIO::OpenUrlJob autodeletes itself, so we can just create it and forget it!
         auto *job = new KIO::OpenUrlJob(url);
@@ -118,6 +118,7 @@ void Lozim::reloadConfiguration()
         setMatchRegex(QRegularExpression());
     }
 
+    // advertise help in KRunner '?lozim'
     // TODO also show help when asking about the trigger word: "?lz"
     QList<KRunner::RunnerSyntax> syntaxes;
     KRunner::RunnerSyntax syntax(QStringLiteral("%1:q:").arg(triggerWord), i18n("Finds matching zim file entries for :q:"));

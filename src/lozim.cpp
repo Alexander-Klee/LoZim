@@ -5,7 +5,6 @@
 #include <klocalizedstring.h>
 #include <KNotificationJobUiDelegate>
 #include <QImage>
-#include <QDir>
 #include <KIO/OpenUrlJob>
 #include <zim/archive.h>
 #include <zim/item.h>
@@ -29,13 +28,23 @@ Lozim::Lozim(QObject *parent, const KPluginMetaData &data)
 void Lozim::init()
 {
     // Setup that should be done once comes here
-    reloadConfiguration();
+    reloadConfiguration(); // this also loads archives
 
-    auto filepath = QStringLiteral("/home/alex/Dokumente/wiki/");
-    QDir dir(filepath);
+    // connect(this, &AbstractRunner::prepare, this, [this]() {
+    //     // Initialize data for the match session. This gets called from the main thread
+    // });
+    // connect(this, &AbstractRunner::teardown, this, []() {
+    //     // Cleanup data from the match session. This gets called from the main thread
+    // });
+}
 
+void Lozim::load_archives() {
+    archives.clear();
+
+    QDir dir(zimFilepath);
     for (const QString &file : dir.entryList(QStringList() << QStringLiteral("*.zim"),
             QDir::Files | QDir::NoDot | QDir::NoDotDot)) {
+
         const QString path = dir.absoluteFilePath(file);
 
         auto archive = ZimArchive(path.toStdString());
@@ -44,13 +53,6 @@ void Lozim::init()
             qWarning() << Q_FUNC_INFO << "Unable to use zim archive: " << path;
         }
     }
-
-    // connect(this, &AbstractRunner::prepare, this, [this]() {
-    //     // Initialize data for the match session. This gets called from the main thread
-    // });
-    // connect(this, &AbstractRunner::teardown, this, []() {
-    //     // Cleanup data from the match session. This gets called from the main thread
-    // });
 }
 
 void Lozim::match(KRunner::RunnerContext &context) {
@@ -121,7 +123,9 @@ void Lozim::run(const KRunner::RunnerContext &context, const KRunner::QueryMatch
 
 void Lozim::reloadConfiguration()
 {
-    KConfigGroup c = config();
+    const KConfigGroup c = config();
+
+    // config for triggerWord
     triggerWord = c.readEntry(CONFIG_TRIGGERWORD, QStringLiteral("lz"));
     if (!triggerWord.isEmpty()) {
         triggerWord.append(QLatin1Char(' '));
@@ -129,6 +133,13 @@ void Lozim::reloadConfiguration()
     } else {
         setMatchRegex(QRegularExpression());
     }
+
+    // config for the zim filepath
+    QString defaultDirpath = QDir::homePath() + QStringLiteral("/Documents/wiki/");
+    zimFilepath = c.readPathEntry(CONFIG_ZIM_FILEPATH, defaultDirpath);
+    QFileInfo pathInfo(zimFilepath);
+    if (!pathInfo.isDir()) zimFilepath = defaultDirpath;
+    load_archives();
 
     // advertise help in KRunner '?lozim'
     // TODO also show help when asking about the trigger word: "?lz"

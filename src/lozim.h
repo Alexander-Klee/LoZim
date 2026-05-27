@@ -2,6 +2,7 @@
 
 #include <KRunner/AbstractRunner>
 #include <KRunner/Action>
+
 #include "ZimArchive.h"
 
 
@@ -15,12 +16,14 @@ public:
     void match(KRunner::RunnerContext &context) override;
     void run(const KRunner::RunnerContext &context, const KRunner::QueryMatch &match) override;
     void reloadConfiguration() override;
+    void load_archives();
 
 protected:
     void init() override;
 
 private:
     QString triggerWord;
+    QString zimFilepath;
     QList<KRunner::Action> actions;
     QList<ZimArchive> archives;
 };

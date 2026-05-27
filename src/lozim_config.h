@@ -5,10 +5,11 @@
 #pragma once
 
 #include <KCModule>
-#include <KPluginMetaData>
+#include <KUrlRequester>
 #include <QLineEdit>
 
 static constexpr char CONFIG_TRIGGERWORD[] = "triggerWord";
+static constexpr char CONFIG_ZIM_FILEPATH[] = "zimFilepath";
 
 class LozimConfig : public KCModule {
     Q_OBJECT
@@ -24,4 +25,5 @@ public Q_SLOTS:
 
 private:
     QLineEdit *triggerWord;
+    KUrlRequester *zimDirpath;
 };

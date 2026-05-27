@@ -1,8 +1,16 @@
 # LoZim
 
-Local Zim file search for KRunner 6.
-Easily search through downloaded Wikis like Wikipedia or the ArchLinux-Wiki.
+_(Still in Alpha)_
 
+Local [ZIM file](https://wiki.openzim.org/wiki/OpenZIM) search for KRunner 6. \
+Instantly search through downloaded Wikis like Wikipedia or the ArchLinux-Wiki.
+
+- [ArchWiki](https://browse.library.kiwix.org/#lang=eng&q=arch) ~35MiB
+- [Wikipedia](https://browse.library.kiwix.org/#lang=eng&q=wikipedia) ~2 GiB to ~15GiB
+
+## Install
+
+just run `./install.sh`, it will build and copy the `.so` to `/lib/qt6/plugins/kf6/krunner/` as well as restart krunner.
 
 ## Dependencies
 

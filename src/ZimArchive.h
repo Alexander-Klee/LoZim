@@ -12,7 +12,7 @@ class ZimArchive {
 public:
     explicit ZimArchive(std::string filepath);
 
-    [[nodiscard]] bool isValid() const { return archive_.has_value(); }
+    [[nodiscard]] bool isValid() const { return archive_.has_value() && searcher_.has_value(); }
     [[nodiscard]] const QIcon& icon() const { return icon_; }
     [[nodiscard]] const QString& source() const { return source_; }
     [[nodiscard]] QString baseAddress() const;

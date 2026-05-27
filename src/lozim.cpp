@@ -5,6 +5,7 @@
 #include <klocalizedstring.h>
 #include <KNotificationJobUiDelegate>
 #include <QImage>
+#include <QDir>
 #include <KIO/OpenUrlJob>
 #include <zim/archive.h>
 #include <zim/item.h>
@@ -30,8 +31,19 @@ void Lozim::init()
     // Setup that should be done once comes here
     reloadConfiguration();
 
-    archives.append(ZimArchive("/home/alex/Dokumente/wiki/wikipedia_en_all_mini_2026-03.zim"));
-    archives.append(ZimArchive("/home/alex/Dokumente/wiki/archlinux_en_all_maxi_2026-04.zim"));
+    auto filepath = QStringLiteral("/home/alex/Dokumente/wiki/");
+    QDir dir(filepath);
+
+    for (const QString &file : dir.entryList(QStringList() << QStringLiteral("*.zim"),
+            QDir::Files | QDir::NoDot | QDir::NoDotDot)) {
+        const QString path = dir.absoluteFilePath(file);
+
+        auto archive = ZimArchive(path.toStdString());
+        if (archive.isValid()) archives.append(archive);
+        else {
+            qWarning() << Q_FUNC_INFO << "Unable to use zim archive: " << path;
+        }
+    }
 
     // connect(this, &AbstractRunner::prepare, this, [this]() {
     //     // Initialize data for the match session. This gets called from the main thread

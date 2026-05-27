@@ -5,12 +5,15 @@
 #include "ZimArchive.h"
 
 #include <QDebug>
+#include <QDir>
 #include <zim/item.h>
 
-ZimArchive::ZimArchive(std::string filepath) {
+ZimArchive::ZimArchive(QDir dir, const QString &fileName) {
     // load the archive
     try {
-        archive_.emplace(filepath);
+        filename_ = fileName;
+        const QString path = dir.absoluteFilePath(fileName);
+        archive_.emplace(path.toStdString());
 
         // get base addr
         source_ = QString::fromStdString(archive_->getMetadata("Source"));
@@ -33,7 +36,6 @@ ZimArchive::ZimArchive(std::string filepath) {
 }
 
 QString ZimArchive::baseAddress() const {
-    // FIXME missing /wiki/ or /title/
     return QStringLiteral("https://") + source_ + QStringLiteral("/");
 }
 

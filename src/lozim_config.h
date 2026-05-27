@@ -15,6 +15,11 @@ static constexpr char CONFIG_TRIGGERWORD[] = "triggerWord";
 static constexpr char CONFIG_ZIM_FILEPATH[] = "zimDirpath";
 static constexpr char CONFIG_ARCHIVES_GROUP[] = "Archives";
 
+struct ArchiveRowWidgets {
+    QCheckBox *enabled = nullptr;
+    QLineEdit *note = nullptr;     // whatever the text input represents
+};
+
 class LozimConfig : public KCModule {
     Q_OBJECT
 
@@ -32,8 +37,8 @@ public Q_SLOTS:
 private:
     QLineEdit *triggerWord;
     KUrlRequester *zimDirpath;
-    QMap<QString, QCheckBox*> archiveChecks; // key: filename
 
+    QMap<QString, ArchiveRowWidgets> archiveRows; // key: filename
     QGroupBox *archivesBox;
     QVBoxLayout *archivesLayout;
 };

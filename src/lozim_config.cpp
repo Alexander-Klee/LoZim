@@ -51,10 +51,8 @@ LozimConfig::LozimConfig(QObject *parent, const KPluginMetaData &metaData)
 void LozimConfig::rebuildArchiveList()
 {
     // clear old checkboxes
-    for (auto *cb : std::as_const(archiveChecks)) {
-        cb->deleteLater();
-    }
-    archiveChecks.clear();
+    qDeleteAll(archivesBox->findChildren<QWidget*>(QString(), Qt::FindDirectChildrenOnly));
+    archiveRows.clear();
 
     const QString dirPath = zimDirpath->text();
     QDir dir(dirPath);
@@ -67,12 +65,30 @@ void LozimConfig::rebuildArchiveList()
     const KConfigGroup archivesGrp = grp.group(QString::fromStdString(CONFIG_ARCHIVES_GROUP));
 
     for (const QString &file : files) {
-        auto *cb = new QCheckBox(file, /*parent=*/archivesBox);
-        cb->setChecked(archivesGrp.readEntry(file, true));
-        archivesLayout->addWidget(cb);
+        auto *row = new QWidget(archivesBox);
+        auto *hl = new QHBoxLayout(row);
+        hl->setContentsMargins(0, 0, 0, 0);
+
+        // checkbox
+        auto *cb = new QCheckBox(file, row);
+        auto checked = archivesGrp.readEntry(file + QStringLiteral("/enabled"), true);
+        cb->setChecked(checked);
+
+        // link edit
+        auto *edit = new QLineEdit(row);
+        edit->setPlaceholderText(i18nc("@info:placeholder", "wiki/"));
+        auto link = archivesGrp.readEntry(file + QStringLiteral("/link"), "wiki/");
+        edit->setText(link);
+
+        hl->addWidget(cb);
+        hl->addWidget(edit, /*stretch=*/1);
+
+        archivesLayout->addWidget(row);
 
         connect(cb, &QCheckBox::toggled, this, &LozimConfig::markAsChanged);
-        archiveChecks.insert(file, cb);
+        connect(edit, &QLineEdit::textChanged, this, &LozimConfig::markAsChanged);
+
+        archiveRows.insert(file, {cb, edit});
     }
 }
 
@@ -102,8 +118,12 @@ void LozimConfig::save()
     grp.writePathEntry(CONFIG_ZIM_FILEPATH, zimDirpath->text());
 
     KConfigGroup archivesGrp = grp.group(QString::fromStdString(CONFIG_ARCHIVES_GROUP));
-    for (auto it = archiveChecks.cbegin(); it != archiveChecks.cend(); ++it) {
-        archivesGrp.writeEntry(it.key(), it.value()->isChecked());
+    for (auto it = archiveRows.cbegin(); it != archiveRows.cend(); ++it) {
+        const QString &file = it.key();
+        const auto &w = it.value();
+
+        archivesGrp.writeEntry(file + QStringLiteral("/enabled"), w.enabled->isChecked());
+        archivesGrp.writeEntry(file + QStringLiteral("/link"), w.note->text());
     }
 
     grp.sync();

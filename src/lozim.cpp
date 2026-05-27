@@ -48,12 +48,12 @@ void Lozim::load_archives() {
     const auto files = dir.entryList({QStringLiteral("*.zim")}, QDir::Files | QDir::NoDotAndDotDot);
     for (const QString &file : files) {
 
-        const bool enabled = archivesGrp.readEntry(file, true);
+        const bool enabled = archivesGrp.readEntry(file + QStringLiteral("/enabled"), true);
         if (!enabled) continue;
 
         const QString path = dir.absoluteFilePath(file);
 
-        auto archive = ZimArchive(path.toStdString());
+        auto archive = ZimArchive(dir, file);
         if (archive.isValid()) {
             archives.append(std::move(archive));
         } else {
@@ -72,12 +72,16 @@ void Lozim::match(KRunner::RunnerContext &context) {
         query.remove(0, triggerWord.length());
     }
 
+    const KConfigGroup c = config();
+    const KConfigGroup archivesGrp = c.group(QString::fromStdString(CONFIG_ARCHIVES_GROUP));
+
     QList<KRunner::QueryMatch> matches;
 
     for (auto archive = archives.begin(); archive != archives.end(); ++archive) {
         if (!archive->isValid()) continue;
         auto results = archive->suggest(query);
 
+        auto link = archivesGrp.readEntry(archive->filename() + QStringLiteral("/link"), "wiki/");
         auto relevance = 1.0;
         for (auto it = results.begin(); it != results.end(); ++it) {
             // auto entry = it.getEntry();
@@ -88,7 +92,7 @@ void Lozim::match(KRunner::RunnerContext &context) {
             match.setSubtext(archive->source());
 
             // add link to online page for later retrieval
-            const QString wikiLink = archive->baseAddress() +
+            const QString wikiLink = archive->baseAddress() + link +
                 QString::fromLatin1(QUrl::toPercentEncoding(QString::fromStdString(it->getPath())));
             match.setData(wikiLink);
             // match.setActions(actions);

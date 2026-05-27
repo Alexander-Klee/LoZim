@@ -13,5 +13,6 @@
     "Name": "LoZim",
     "Version": "0.1",
     "Website": "https://example.com/"
-  }
+  },
+  "X-KDE-ConfigModule": "kf6/krunner/kcms/kcm_lozim"
 }

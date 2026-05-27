@@ -38,9 +38,10 @@ void Lozim::match(KRunner::RunnerContext &context) {
     QString query = context.query();
     if (query.startsWith(QLatin1Char('?'))) return;
 
-    const QString triggerWord = QStringLiteral("lz");
-    if (!query.startsWith(triggerWord)) return;
-    query.remove(0, triggerWord.length());
+    if (!triggerWord.isEmpty()) {
+        if (!query.startsWith(triggerWord)) return;
+        query.remove(0, triggerWord.length());
+    }
 
     auto archive = archives[0];
 
@@ -97,6 +98,16 @@ void Lozim::run(const KRunner::RunnerContext &context, const KRunner::QueryMatch
 
 void Lozim::reloadConfiguration()
 {
+    KConfigGroup c = config();
+    triggerWord = c.readEntry(CONFIG_TRIGGERWORD, QStringLiteral("lz"));
+    if (!triggerWord.isEmpty()) {
+        triggerWord.append(QLatin1Char(' '));
+        setTriggerWords({triggerWord});
+    } else {
+        setMatchRegex(QRegularExpression());
+    }
+    // TODO
+    // setSyntaxes({RunnerSyntax(i18nc("Dictionary keyword", "%1:q:", triggerWord), i18n("Finds the definition of :q:."))});
 }
 
 K_PLUGIN_CLASS_WITH_JSON(Lozim, "lozim.json")

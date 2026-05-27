@@ -12,7 +12,7 @@ include(KDECMakeSettings)
 include(KDECompilerSettings NO_POLICY_SCOPE)
 include(FeatureSummary)
 
-find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS I18n Config Runner KIO Notifications)
+find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS I18n Config Runner KIO Notifications KCMUtils)
 
 kcoreaddons_add_plugin(lozim SOURCES src/lozim.cpp src/ZimArchive.cpp INSTALL_NAMESPACE "kf6/krunner")
 
@@ -25,5 +25,19 @@ target_link_libraries(lozim
         KF6::Runner
         KF6::KIOWidgets
         KF6::Notifications
+        KF6::KCMUtils
+        zim
+)
+
+kcoreaddons_add_plugin(kcm_lozim SOURCES src/lozim_config.cpp INSTALL_NAMESPACE "kf6/krunner/kcms")
+
+target_link_libraries(kcm_lozim
+        PRIVATE
+        KF6::I18n
+        KF6::ConfigCore
+        KF6::Runner
+        KF6::KIOWidgets
+        KF6::Notifications
+        KF6::KCMUtils
         zim
 )

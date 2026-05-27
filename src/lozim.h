@@ -20,6 +20,7 @@ protected:
     void init() override;
 
 private:
+    QString triggerWord;
     QList<KRunner::Action> actions;
     QList<ZimArchive> archives;
 };
